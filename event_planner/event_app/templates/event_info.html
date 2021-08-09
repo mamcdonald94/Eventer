@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Event Name Here</title>
+</head>
+<body>
+    <div class="container">
+        <!-- align all these -->
+        <div class="row"> 
+            <div class="col-md-8">
+                <h1>Welcome, User!</h1>
+                [replace User with name]
+            </div>
+            <div class="col-md-4">
+                <a href="#">Logout</a> | <a href="#">Home</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Event Name Here</h3>
+                <p>Host:</p>
+                <p>Location:</p>
+                <p>Time:</p>
+                <p>Date:</p>
+            </div>
+            <div class="col-md-6">
+                <p>insert google maps api here</p>
+            </div>
+        </div>
+        <!-- conditional to show different html based on event creator or attendee -->
+        <!-- Attendee view -->
+        <a href="#"><button class="btn btn-primary">RSVP</button></a>                
+        <a href="#"><button class="btn btn-primary">Attendees</button></a>
+        <a href="#"><button class="btn btn-secondary">Contact Host</button></a>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <h6>Leave a Comment for the Host!</h6>
+                <form action="#" method="POST">
+                    {% csrf_token %}
+                    <textarea name="comment" cols="50" rows="4"></textarea>
+                    <button class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+        <!-- Owner view -->
+        <a href="#"><button class="btn btn-primary">Attendees</button> </a>
+        <a href="#"><button class="btn btn-danger">Edit Event</button></a>
+        <a href="#"><button class="btn btn-secondary">Contact Attendees</button></a>
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Comments:</h3>
+                <p>comment here</p>
+                <p>comment here</p>
+                <p>comment here</p>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
