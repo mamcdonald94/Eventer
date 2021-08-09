@@ -33,6 +33,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django.forms', # added django.forms so django can find default form templates
+    'crispy_forms',
     'event_app', 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,8 +59,8 @@ ROOT_URLCONF = 'event_planner.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': False, # formerly True
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -66,9 +68,23 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            # everything below this line in TEMPLATES was added, not defaults
+            'loaders': [ 
+            ('django.template.loaders.cached.Loader', [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ]),                
+            ]
         },
     },
 ]
+
+# this was also added, remove if having problems
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+# this was also added, remove if having problems
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+# this was also added, remove if having problems
+CRISPY_FAIL_SILENTLY = not DEBUG
 
 WSGI_APPLICATION = 'event_planner.wsgi.application'
 

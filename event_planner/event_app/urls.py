@@ -1,7 +1,10 @@
 from django.urls import path
 from .views import *
 
+
 urlpatterns = [
-    path('', index),
-    path('event/id/info', event_info),
+    path('login/', index),
+    path('event/info', event_info),
+    path('event/event-form', event_form),
+    path('event/create-event', create_event),
 ]
