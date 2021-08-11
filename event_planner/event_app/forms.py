@@ -6,12 +6,15 @@ from crispy_forms.layout import Submit
 
 
 class RegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
-    confirm_password = forms.CharField(widget=forms.PasswordInput())
+    # password = forms.CharField(widget=forms.PasswordInput(), validators=[password_validator])
+    confirm_password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email')
+        fields = ('first_name', 'last_name', 'email', 'password')
+        widgets = {
+            'password': forms.PasswordInput,
+        }
 
     def clean(self):
         cleaned_data = super(RegistrationForm, self).clean()
@@ -21,7 +24,18 @@ class RegistrationForm(forms.ModelForm):
         if password != confirm_password:
             self.add_error('confirm_password', "Password does not match")
         return cleaned_data
-    # add helper to this form
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'RegistrationForm'
+        self.helper.form_class = 'bootstrap4'
+        self.helper.form_method = 'POST'
+        self.helper.form_action = '/create_user/'
+        self.helper.attrs = {'novalidate': ''}
+        self.helper.form_show_errors = True
+
+        self.helper.add_input(Submit('submit', 'Register'))
 
 class EventForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

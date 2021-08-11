@@ -3,8 +3,12 @@ from .views import *
 
 
 urlpatterns = [
-    path('login/', index),
+    path('', index),
+    path('create_user/', create_user),
+    path('login/', login),
+    path('logout/', logout),
     path('event/info', event_info),
     path('event/event-form', event_form),
     path('event/create-event', create_event),
+    path('user/<int:user_id>', dashboard),
 ]
