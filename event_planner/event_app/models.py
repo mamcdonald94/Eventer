@@ -24,10 +24,12 @@ def password_validator(value):
         raise ValidationError(
             "password must be at least 8 characters, contain one uppercase letter, one lowercase letter, and one number"
         )
-    # elif postData['password'] != postData['confirm_password']:
-    #     raise ValidationError(
-    #         "passwords did not match"
-    #     )
+
+def description_validator(value):
+    if len(value) < 10:
+        raise ValidationError(
+            "description must be at least 10 characters"
+        )
 
 def address_validator(value):
     ADD_REGEX = re.compile(r'^\d+\w+\s\w+\s\w+\s\w+\s\w+\s\d{5}$')
@@ -58,7 +60,7 @@ class User(models.Model):
 
 class Event(models.Model):
     title = models.CharField(max_length=255, validators=[title_validator])
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, validators=[description_validator])
     location = models.CharField(max_length=255, validators=[address_validator])
     time = models.TimeField()
     date = models.DateField()

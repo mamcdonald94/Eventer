@@ -14,18 +14,13 @@
                 <h1>Create an Event</h1>
             </div>
             <div class="col-md-4">
-                <a href="#">Logout</a> | <a href="#">Home</a>
+                <a href="/logout">Logout</a> | <a href="/user/{{request.session.logged_user_id}}">Home</a>
             </div>          
         </div>
         <div class="row">
             <div class="col-md-6">
                 {% load crispy_forms_tags %}
                 {% crispy EventForm EventForm.helper %}
-                <!-- <form action="/event/create-event" method="POST">
-                    {% csrf_token %}
-                    {{ eventForm|crispy }}
-                    <button type="submit" class="btn btn-success">Create Event</button>
-                </form> -->
             </div>
         </div>
     </div>

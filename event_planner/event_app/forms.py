@@ -7,7 +7,6 @@ from crispy_forms.layout import Submit
 
 
 class RegistrationForm(forms.ModelForm):
-    # password = forms.CharField(widget=forms.PasswordInput(), validators=[password_validator])
     confirm_password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
@@ -41,6 +40,7 @@ class RegistrationForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Register'))
 
 class EventForm(forms.ModelForm):
+    time = forms.TimeField(error_messages={'invalid': 'please enter a time in 12-hour format (ex: 7:00 AM, 3:30 PM, etc.)'})
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
