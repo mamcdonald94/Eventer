@@ -24,6 +24,10 @@ def password_validator(value):
         raise ValidationError(
             "password must be at least 8 characters, contain one uppercase letter, one lowercase letter, and one number"
         )
+    # elif postData['password'] != postData['confirm_password']:
+    #     raise ValidationError(
+    #         "passwords did not match"
+    #     )
 
 def address_validator(value):
     ADD_REGEX = re.compile(r'^\d+\w+\s\w+\s\w+\s\w+\s\w+\s\d{5}$')
