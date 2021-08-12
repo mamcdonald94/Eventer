@@ -58,7 +58,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'event_planner.urls'
 
-LOGIN_URL = '/login-required/'
+# LOGIN_URL = '/login-required/'
 # django toolbar
 INTERNAL_IPS = [
     '127.0.0.1',
@@ -133,6 +133,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+TIME_FORMAT = [
+    'P'
+]
+
+TIME_INPUT_FORMATS = [
+    '%I:%M %p'
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
