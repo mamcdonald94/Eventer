@@ -3,6 +3,7 @@ from django.forms import fields, widgets
 from .models import *
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+# import bcrypt
 
 
 class RegistrationForm(forms.ModelForm):
@@ -19,10 +20,12 @@ class RegistrationForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super(RegistrationForm, self).clean()
         password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
 
+        confirm_password = cleaned_data.get("confirm_password")
+        # check password match before hashing
         if password != confirm_password:
             self.add_error('confirm_password', "Password does not match")
+        # hash password
         return cleaned_data
     
     def __init__(self, *args, **kwargs):

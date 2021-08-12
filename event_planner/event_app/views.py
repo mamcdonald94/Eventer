@@ -1,10 +1,11 @@
-import event_app
+import bcrypt
 from django.http.response import HttpResponse
 from django.shortcuts import render, redirect
 from .forms import *
 from django.contrib.auth.decorators import login_required
 from .models import *
 from django.contrib import messages
+
 
 def index(request):
     form = RegistrationForm()
@@ -19,7 +20,12 @@ def create_user(request):
     if request.method == 'POST':
         reg_form = RegistrationForm(request.POST)
         if reg_form.is_valid():
-            new_user = reg_form.save()
+            new_user = reg_form.save(commit=False)
+            print(new_user.password)
+            hash_pw = bcrypt.hashpw(reg_form.cleaned_data['password'].encode(), bcrypt.gensalt()).decode()
+            new_user.password = hash_pw
+            print(new_user.password)
+            new_user.save()
             # stores the logged in user's id for usage elsewhere in app
             request.session['logged_user_id'] = new_user.id
             return redirect(f'/user/{new_user.id}')
@@ -27,26 +33,39 @@ def create_user(request):
             return render(request, 'login_reg.html', context={'RegForm': reg_form})
 
 def login(request):
-    pass
+    if request.method == 'POST':
+        user = User.objects.filter(email=request.POST['email'])
+        if user:
+
+            logged_user = user[0]
+            # checks to see if the password submitted matches the password in the database
+            if bcrypt.checkpw(request.POST['password'].encode(), logged_user.password.encode()):
+                # holds the id of the currently logged in user, redirects to their dashboard
+                request.session['logged_user_id'] = logged_user.id
+                return redirect(f'/user/{logged_user.id}')
+
+        messages.error(request, "invalid email or password")
+    return redirect('/')
 
 def logout(request):
     request.session.flush()
     return redirect('/')
 
+def login_req(request):
+    return render(request, 'login_required.html')
+
+@login_required(redirect_field_name=None)
 def dashboard(request, user_id):
-    if 'logged_user_id' not in request.session:
-        messages.error(request, "You must be logged in or registered to access this page!")
-        return redirect('/')
     context = {
         'logged_user': User.objects.get(id=user_id),
     }
     return render(request, 'dashboard.html', context)
 
-@login_required(login_url='')
+@login_required(redirect_field_name=None)
 def event_info(request):
     return render(request, 'event_info.html')
 
-@login_required(login_url='')
+@login_required(redirect_field_name=None)
 def event_form(request):
     form = EventForm()
     context = {
@@ -54,7 +73,7 @@ def event_form(request):
     }
     return render(request, "create_event.html", context)
 
-@login_required(login_url='')
+@login_required(redirect_field_name=None)
 def create_event(request):
     pass
 # creating event follows below -- how to render errors?
