@@ -19,6 +19,6 @@ import debug_toolbar
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('event_app.urls')),
+    path('', include('event_app.urls', namespace='event_planner')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]

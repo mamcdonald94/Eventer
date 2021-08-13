@@ -1,8 +1,10 @@
 from django import forms
 from django.forms import fields, widgets
+from django.urls.base import reverse
 from .models import *
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+import crispy_forms.layout as cfl
 # import bcrypt
 
 
@@ -51,13 +53,36 @@ class EventForm(forms.ModelForm):
         self.helper.attrs = {'novalidate': ''}
 
         self.helper.add_input(Submit('submit', 'Create Event'))
-
+    
     class Meta:
         model = Event
         exclude = ['host', 'attendees']
         widgets = {
             'date': forms.SelectDateWidget,
         }
+
+# I'm sure there is a better way to do this, but I created a second form class specifically for editing
+class EditEventForm(forms.ModelForm):
+    time = forms.TimeField(error_messages={'invalid': 'please enter a time in 12-hour format (ex: 7:00 AM, 3:30 PM, etc.)'})
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'EditEventForm'
+        self.helper.form_class = 'bootstrap4'
+        self.helper.form_method = 'POST'
+        # searches for the named url path ('edit_event') and supplies the event instance id to the url so the event can be edited
+        self.helper.form_action = reverse('event_planner:edit_event', args=[self.instance.id])
+        self.helper.attrs = {'novalidate': ''}
+
+        self.helper.add_input(Submit('submit', 'Edit Event'))
+    
+    class Meta:
+        model = Event
+        exclude = ['host', 'attendees']
+        widgets = {
+            'date': forms.SelectDateWidget,
+        }
+
 
 class CommentForm(forms.ModelForm):
     class Meta:
