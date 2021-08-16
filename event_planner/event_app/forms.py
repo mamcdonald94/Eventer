@@ -91,8 +91,6 @@ class CommentForm(forms.ModelForm):
         self.helper.form_id = 'CommentForm'
         self.helper.form_class = 'bootstrap4'
         self.helper.form_method = 'POST'
-        # searches for the named url path ('add_comment') and supplies the event instance id to the url so the event can be edited
-        # self.helper.form_action = reverse('event_planner:add_comment', args=[self.instance.event_commented.id])
         self.helper.attrs = {'novalidate': ''}
 
         self.helper.add_input(Submit('submit', 'Add Comment'))
