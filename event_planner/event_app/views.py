@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from .forms import *
 from .models import *
 from django.contrib import messages
+from django.urls import reverse
 
 
 def index(request):
@@ -12,8 +13,6 @@ def index(request):
         "RegForm": form,
     }
     return render(request, "login_reg.html", context)
-
-# need to figure out how to apply validations and encrypt passwords using a django form -- might need to exclude the password field and then manipulate it later like host field in Event model
 
 def create_user(request):
     if request.method == 'POST':
@@ -100,11 +99,54 @@ def create_event(request):
         if e_form.is_valid():
             new_event = e_form.save(commit=False)
             new_event.host = User.objects.get(id=request.session['logged_user_id'])
-            print(new_event.host.first_name)
             new_event.save()
             return redirect(f'/event/info/{new_event.id}')
 
         return render(request, 'create_event.html', context={'EventForm': e_form})
 
-# def edit_event(request, event_id):
-# USE event_form = EventForm(initial={'field1': intial value}) instantiate event object into form
+def edit_form(request, event_id):
+    if 'logged_user_id' not in request.session:
+        return redirect('/login-required')
+
+    this_event = Event.objects.get(id=event_id)
+    event_form = EditEventForm(instance=this_event)
+    return render(request, 'edit_event.html', context={'EditForm': event_form})
+
+def edit_event(request, event_id):
+    if 'logged_user_id' not in request.session:
+        return redirect('/login-required')
+    if request.method == 'POST':
+        # event instance so the form only EDITS THE DESIRED EVENT, NOT MAKE NEW
+        this_event = Event.objects.get(id=event_id)
+        edit_form = EditEventForm(request.POST, instance=this_event)
+        if edit_form.is_valid():
+            updated_event = edit_form.save()
+            return redirect(f'/event/info/{updated_event.id}')
+
+        return render(request, 'edit_event.html', context={'EditForm': edit_form})
+
+def add_attendee(request, event_id):
+    attendee = User.objects.get(id=request.session['logged_user_id'])
+    event = Event.objects.get(id=event_id)
+
+    event.attendees.add(attendee)
+    event.save()
+    messages.success(request, 'you have successfully RSVP\'d!')
+    return redirect(f'/event/info/{event.id}')
+
+def remove_attendee(request, event_id):
+    attendee = User.objects.get(id=request.session['logged_user_id'])
+    event = Event.objects.get(id=event_id)
+
+    event.attendees.remove(attendee)
+    event.save()
+    messages.success(request, 'you have successfully left the event!')
+    return redirect(f'/event/info/{event.id}')
+
+# another method to try if EventForm(instance=) doesn't work:
+# event_form = EventForm(initial={
+#     'title': this_event.title,
+#     'description': this_event.description,
+#     'location': this_event.time,
+
+# }) 

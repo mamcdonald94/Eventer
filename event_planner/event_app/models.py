@@ -32,7 +32,7 @@ def description_validator(value):
         )
 
 def address_validator(value):
-    ADD_REGEX = re.compile(r'^\d+\w+\s\w+\s\w+\s\w+\s\w+\s\d{5}$')
+    ADD_REGEX = re.compile(r'\d+ [\w ]+,? [\w ]+,? ?\w{2}\s\d{5}')
     if not ADD_REGEX.match(value):
         raise ValidationError(
             "please input a valid street address, state abbreviation and zip code (ex: 123 Main St Anywhere GA 12345)"
