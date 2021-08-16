@@ -85,6 +85,18 @@ class EditEventForm(forms.ModelForm):
 
 
 class CommentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'CommentForm'
+        self.helper.form_class = 'bootstrap4'
+        self.helper.form_method = 'POST'
+        # searches for the named url path ('add_comment') and supplies the event instance id to the url so the event can be edited
+        # self.helper.form_action = reverse('event_planner:add_comment', args=[self.instance.event_commented.id])
+        self.helper.attrs = {'novalidate': ''}
+
+        self.helper.add_input(Submit('submit', 'Add Comment'))
+
     class Meta:
         model = Comment
         exclude = ['created_by', 'event_commented']

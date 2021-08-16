@@ -1,3 +1,4 @@
+from django.db.models.query_utils import Q
 import bcrypt
 from django.http.response import HttpResponse
 from django.shortcuts import render, redirect
@@ -26,13 +27,13 @@ def create_user(request):
             request.session['logged_user_id'] = new_user.id
             return redirect(f'/user/{new_user.id}')
         else:
+            # if data does not pass validations, render form along with errors
             return render(request, 'login_reg.html', context={'RegForm': reg_form})
 
 def login(request):
     if request.method == 'POST':
         user = User.objects.filter(email=request.POST['email'])
         if user:
-
             logged_user = user[0]
             # checks to see if the password submitted matches the password in the database
             if bcrypt.checkpw(request.POST['password'].encode(), logged_user.password.encode()):
@@ -51,7 +52,7 @@ def login_req(request):
     return render(request, 'login_required.html')
 
 def dashboard(request, user_id):
-    # is there a way to turn lines 60/61 into a decorator?
+    # is there a way to turn the following two lines into a decorator?
     if 'logged_user_id' not in request.session:
         return redirect('/login-required')
 
@@ -63,9 +64,14 @@ def dashboard(request, user_id):
 def event_info(request, event_id):
     if 'logged_user_id' not in request.session:
         return redirect('/login-required')
+
+    comment_form = CommentForm()
+    # specify form action in views so it can access event_id
+    comment_form.helper.form_action = reverse('event_planner:add_comment', kwargs={'event_id': event_id})
     context = {
         'this_event': Event.objects.get(id=event_id),
         'this_user': User.objects.get(id=request.session['logged_user_id']),
+        'CommentForm': comment_form,
     }
     return render(request, 'event_info.html', context)
 
@@ -94,15 +100,23 @@ def event_form(request):
 def create_event(request):
     if 'logged_user_id' not in request.session:
         return redirect('/login-required')
+
     if request.method == 'POST':
         e_form = EventForm(request.POST)
         if e_form.is_valid():
+            # creates event but doesn't commit save to allow for adding host from session
             new_event = e_form.save(commit=False)
             new_event.host = User.objects.get(id=request.session['logged_user_id'])
             new_event.save()
-            return redirect(f'/event/info/{new_event.id}')
+            return redirect(f'/event/{new_event.id}/info')
 
         return render(request, 'create_event.html', context={'EventForm': e_form})
+
+def cancel_event(request, event_id):
+    this_event = Event.objects.get(id=event_id)
+
+    this_event.delete()
+    return redirect(f"/user/{request.session['logged_user_id']}")
 
 def edit_form(request, event_id):
     if 'logged_user_id' not in request.session:
@@ -110,18 +124,24 @@ def edit_form(request, event_id):
 
     this_event = Event.objects.get(id=event_id)
     event_form = EditEventForm(instance=this_event)
-    return render(request, 'edit_event.html', context={'EditForm': event_form})
+    context = {
+        'user': User.objects.get(id=request.session['logged_user_id']),
+        'EditForm': event_form,
+        'event': this_event,
+    }
+    return render(request, 'edit_event.html', context)
 
 def edit_event(request, event_id):
     if 'logged_user_id' not in request.session:
         return redirect('/login-required')
+
     if request.method == 'POST':
         # event instance so the form only EDITS THE DESIRED EVENT, NOT MAKE NEW
         this_event = Event.objects.get(id=event_id)
         edit_form = EditEventForm(request.POST, instance=this_event)
         if edit_form.is_valid():
             updated_event = edit_form.save()
-            return redirect(f'/event/info/{updated_event.id}')
+            return redirect(f'/event/{updated_event.id}/info')
 
         return render(request, 'edit_event.html', context={'EditForm': edit_form})
 
@@ -132,7 +152,7 @@ def add_attendee(request, event_id):
     event.attendees.add(attendee)
     event.save()
     messages.success(request, 'you have successfully RSVP\'d!')
-    return redirect(f'/event/info/{event.id}')
+    return redirect(f'/event/{event.id}/info')
 
 def remove_attendee(request, event_id):
     attendee = User.objects.get(id=request.session['logged_user_id'])
@@ -141,12 +161,27 @@ def remove_attendee(request, event_id):
     event.attendees.remove(attendee)
     event.save()
     messages.success(request, 'you have successfully left the event!')
-    return redirect(f'/event/info/{event.id}')
+    return redirect(f'/event/{event.id}/info')
 
-# another method to try if EventForm(instance=) doesn't work:
-# event_form = EventForm(initial={
-#     'title': this_event.title,
-#     'description': this_event.description,
-#     'location': this_event.time,
+def add_comment(request, event_id):
+    if 'logged_user_id' not in request.session:
+        return redirect('/login-required')
 
-# }) 
+    commenter = User.objects.get(id=request.session['logged_user_id'])
+    event = Event.objects.get(id=event_id)
+
+    comment_form = CommentForm(request.POST)
+    if comment_form.is_valid():
+        new_comment = comment_form.save(commit=False)
+        new_comment.created_by = commenter
+        new_comment.event_commented = event
+        new_comment.save()
+        return redirect(f'/event/{event.id}/info')
+    
+    # provide context so the user and event info renders upon comment error
+    context = {
+        'CommentForm': comment_form,
+        'this_event': event,
+        'this_user': commenter,
+    }
+    return render(request, 'event_info.html', context)
