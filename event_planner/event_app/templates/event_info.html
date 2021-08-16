@@ -1,24 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <title>Event Name Here</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAS5WLSCvRmuoFy9mIpfU_1F609nd-Ku0&callback=initMap"></script>
+    <title>{{this_event.title}}</title>
 </head>
+
 <body>
     <div class="container">
-        <div class="row"> 
+        <!-- Modal -->
+        <div class="modal fade" id="attendeeModal" tabindex="-1" aria-labelledby="attendeeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="attendeeModalLabel">People Attending {{this_event.title}}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+                            {% for attendee in this_event.attendees.all %}
+                            <!-- conditional to show different name based on which user is viewing list -->                            
+                            {% if attendee.id != this_user.id %}
+                            <li>{{attendee.first_name}} {{attendee.last_name}}</li>
+                            {% else %}
+                            <li>You</li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-8">
                 <h1>Welcome, {{this_user.first_name}}!</h1>
             </div>
             <div class="col-md-4">
-                <a href="/logout">Logout</a> | <a href="/user/{{this_user.id}}">Home</a> | <a href="/events"> Back to Events</a>
+                <a href="/logout">Logout</a> | <a href="/user/{{this_user.id}}">Home</a> | <a href="/events"> Back to
+                    Events</a>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <h3>{{this_event.title}}</h3>
                 <p>Host: {{this_event.host.first_name}} {{this_event.host.last_name}}</p>
                 <p>Location: {{this_event.location}}</p>
@@ -27,13 +59,38 @@
                 {% if messages %}
                 <ul class="messages" style="list-style-type: none;">
                     {% for message in messages %}
-                    <li {% if message.tags %} class="{{message.tags}}"{% endif %} style="color: green;">{{message}}</li>
+                    <li {% if message.tags %} class="{{message.tags}}" {% endif %} style="color: green;">{{message}}
+                    </li>
                     {% endfor %}
                 </ul>
                 {% endif %}
             </div>
             <div class="col-md-6">
-                <p>insert google maps api here</p>
+                <p hidden id="location">{{this_event.location}}</p>
+                <div id="map" class="w-75 h-100"></div>
+                <script>
+                    // Initialize and add the map
+                    function initMap() {
+                        geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ 'address': document.getElementById('location').innerHTML }, function (results, status) {
+                            if (status == 'OK') {
+                                const map = new google.maps.Map(document.getElementById("map"), {
+                                zoom: 15,
+                                center: results[0].geometry.location,
+                        });
+                                map.setCenter(results[0].geometry.location);
+                                var marker = new google.maps.Marker({
+                                    map: map,
+                                    position: results[0].geometry.location
+                                });
+                            } 
+                            else {
+                                alert('Geocode was not successful for the following reason: ' + status);
+                            }
+                        });
+                        geocoder = new google.maps.Geocoder();
+                    }
+                </script>
             </div>
         </div>
         {% if this_event.host.id != request.session.logged_user_id %}
@@ -44,33 +101,44 @@
         {% else %}
         <a href="/event/{{this_event.id}}/remove-attendee"><button class="btn btn-danger">Leave Event</button></a>
         {% endif %}
-        <a href="#"><button class="btn btn-primary">Attendees</button></a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#attendeeModal">Attendees</button>
         <a href="#"><button class="btn btn-secondary">Contact Host</button></a>
-        <div class="row">
+        <div class="row mt-4">
             <div class="col-md-4 mb-3">
                 <h6>Leave a Comment for the Host!</h6>
-                <form action="#" method="POST">
-                    {% csrf_token %}
-                    <textarea name="comment" cols="50" rows="4"></textarea>
-                    <button class="btn btn-primary">Submit</button>
-                </form>
+                {% load crispy_forms_tags %}
+                {% crispy CommentForm %}
+            </div>
+            <div class="col-md-6 mb-3">
+                <h3>Comments:</h3>
+                {% for comment in this_event.comments.all %}
+                <!-- conditional to show different name based on if user made comment -->
+                {% if comment.created_by.id != this_user.id %}
+                <p>{{comment.created_at}} {{comment.created_by}} says: {{comment.content}}</p>
+                {% else %}
+                <p>{{comment.created_at}} You said: {{comment.content}}</p>
+                {% endif %}
+                {% endfor %}
             </div>
         </div>
         {% else %}
         <!-- Owner view -->
-        <a href="#"><button class="btn btn-primary">Attendees</button> </a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#attendeeModal">Attendees</button>
         <a href="/event/edit/{{this_event.id}}"><button class="btn btn-danger">Edit Event</button></a>
         <a href="#"><button class="btn btn-secondary">Contact Attendees</button></a>
         <div class="row">
             <div class="col-md-6">
                 <h3>Comments:</h3>
                 {% for comment in this_event.comments.all %}
-                <p>{{comment.content}}</p>
+                <p>{{comment.created_at}} {{comment.created_by}} says: {{comment.content}}</p>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
