@@ -54,7 +54,7 @@
                             <td>{{event.location}}</td>
                             <td>{{event.date}}</td>
                             <td>{{event.attendees|length}}</td>
-                            <td><a href="/event/{{event.id}}/info">View</a> | <a href="/event/{{event.id}}/edit">Edit</a> | <a href="/event/{{event.id}}/cancel-event">Cancel</a> | <a href="#">Contact Participants</a></td>
+                            <td><a href="/event/{{event.id}}/info">View</a> | <a href="/event/{{event.id}}/edit">Edit</a> | <a href="/event/{{event.id}}/cancel-event">Cancel</a> | <a href="/event/{{event.id}}/email-attendee">Contact Participants</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>

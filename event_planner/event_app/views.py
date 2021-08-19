@@ -6,6 +6,7 @@ from .forms import *
 from .models import *
 from django.contrib import messages
 from django.urls import reverse
+from django.core.mail import send_mail, send_mass_mail
 
 
 def index(request):
@@ -162,6 +163,18 @@ def remove_attendee(request, event_id):
     event.save()
     messages.success(request, 'you have successfully left the event!')
     return redirect(f'/event/{event.id}/info')
+
+def email_attendee(request, event_id):
+    this_event = Event.objects.get(id=event_id)
+    attendees = this_event.attendees.all()
+    attendee_emails = []
+    for attendee in attendees:
+        attendee_emails.append(attendee.email)
+
+    message1 = ('Event Change', f'Please check the {this_event.title} page, there has been a change!', 'test@mail.com', attendee_emails)
+    send_mass_mail((message1,), fail_silently=False)
+    messages.success(request, 'you have successfully emailed the attendees!')
+    return redirect(f'/event/{this_event.id}/info')
 
 def add_comment(request, event_id):
     if 'logged_user_id' not in request.session:
