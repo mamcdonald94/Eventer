@@ -164,6 +164,7 @@ def remove_attendee(request, event_id):
     messages.success(request, 'you have successfully left the event!')
     return redirect(f'/event/{event.id}/info')
 
+# create a contact form in forms.py, and then use the info pulled from there to create email
 def email_attendee(request, event_id):
     this_event = Event.objects.get(id=event_id)
     attendees = this_event.attendees.all()
