@@ -66,13 +66,20 @@ def event_info(request, event_id):
     if 'logged_user_id' not in request.session:
         return redirect('/login-required')
 
+    # form for comments
     comment_form = CommentForm()
     # specify form action in views so it can access event_id
     comment_form.helper.form_action = reverse('event_planner:add_comment', kwargs={'event_id': event_id})
+    # form to email host
+    contact_form = ContactForm()
+    contact_form.helper.form_action = reverse('event_planner:email_host', kwargs={'event_id': event_id})
+
+
     context = {
         'this_event': Event.objects.get(id=event_id),
         'this_user': User.objects.get(id=request.session['logged_user_id']),
         'CommentForm': comment_form,
+        'ContactForm': contact_form,
     }
     return render(request, 'event_info.html', context)
 
@@ -177,6 +184,28 @@ def email_attendee(request, event_id):
     messages.success(request, 'you have successfully emailed the attendees!')
     return redirect(f'/event/{this_event.id}/info')
 
+def email_host(request, event_id):
+    this_event = Event.objects.get(id=event_id)
+    host = this_event.host
+
+    contact_form = ContactForm(request.POST)
+    if contact_form.is_valid():
+        email_address = contact_form.cleaned_data["your_email"]
+        subject = contact_form.cleaned_data["subject"]
+        message = contact_form.cleaned_data["message"]
+        send_mail(subject, message, email_address, [host.email], fail_silently=False)
+        messages.success(request, 'you have successfully emailed the host!')
+        return redirect(f'/event/{this_event.id}/info')
+
+    context = {
+        'this_event': Event.objects.get(id=event_id),
+        'this_user': User.objects.get(id=request.session['logged_user_id']),
+        'CommentForm': CommentForm(),
+        'ContactForm': contact_form,
+    }
+    return render(request, 'event_info.html', context)
+
+
 def add_comment(request, event_id):
     if 'logged_user_id' not in request.session:
         return redirect('/login-required')
@@ -195,6 +224,7 @@ def add_comment(request, event_id):
     # provide context so the user and event info renders upon comment error
     context = {
         'CommentForm': comment_form,
+        'ContactForm': ContactForm(),
         'this_event': event,
         'this_user': commenter,
     }

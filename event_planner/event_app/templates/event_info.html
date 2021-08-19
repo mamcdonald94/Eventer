@@ -13,7 +13,7 @@
 
 <body>
     <div class="container">
-        <!-- Modal -->
+        <!-- Attendee Modal -->
         <div class="modal fade" id="attendeeModal" tabindex="-1" aria-labelledby="attendeeModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -32,6 +32,24 @@
                             {% endif %}
                             {% endfor %}
                         </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Contact Modal -->
+        <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="contactModalLabel">Contact Host</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% load crispy_forms_tags %}
+                        {% crispy ContactForm %}
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -101,7 +119,7 @@
         <a href="/event/{{this_event.id}}/remove-attendee"><button class="btn btn-danger">Leave Event</button></a>
         {% endif %}
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#attendeeModal">Attendees</button>
-        <a href="#"><button class="btn btn-secondary">Contact Host</button></a>
+        <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#contactModal">Contact Host</button>
         <div class="row mt-4">
             <div class="col-md-4 mb-3">
                 <h6>Leave a Comment for the Host!</h6>

@@ -7,6 +7,20 @@ from crispy_forms.layout import Submit
 import crispy_forms.layout as cfl
 # import bcrypt
 
+class ContactForm(forms.Form):
+    your_email = forms.EmailField(required=True)
+    subject = forms.CharField(max_length=55, required=True)
+    message = forms.CharField(max_length=255, required=True, widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'ContactForm'
+        self.helper.form_class = 'bootstrap4'
+        self.helper.form_method = 'POST'
+        self.helper.form_show_errors = True
+
+        self.helper.add_input(Submit('submit', 'Send Email'))
 
 class RegistrationForm(forms.ModelForm):
     confirm_password = forms.CharField(widget=forms.PasswordInput)
@@ -91,7 +105,7 @@ class CommentForm(forms.ModelForm):
         self.helper.form_id = 'CommentForm'
         self.helper.form_class = 'bootstrap4'
         self.helper.form_method = 'POST'
-        self.helper.attrs = {'novalidate': ''}
+        self.helper.form_show_errors = True
 
         self.helper.add_input(Submit('submit', 'Add Comment'))
 
