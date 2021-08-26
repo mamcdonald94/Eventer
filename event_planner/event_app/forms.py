@@ -3,9 +3,10 @@ from django.forms import fields, widgets
 from django.urls.base import reverse
 from .models import *
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from crispy_forms.layout import Submit, Layout, Fieldset
 import crispy_forms.layout as cfl
-# import bcrypt
+from crispy_forms.bootstrap import FormActions
+
 
 class ContactForm(forms.Form):
     your_email = forms.EmailField(required=True)
@@ -47,9 +48,11 @@ class RegistrationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'RegistrationForm'
-        self.helper.form_class = 'bootstrap4'
+        self.helper.form_class = 'form-horizontal'
         self.helper.form_method = 'POST'
         self.helper.form_action = '/create_user/'
+        self.helper.label_class = 'col-lg-2'
+        self.helper.field_class = 'col-lg-8 mb-2 mt-2'
         self.helper.attrs = {'novalidate': ''}
         self.helper.form_show_errors = True
 
@@ -61,9 +64,11 @@ class EventForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'EventForm'
-        self.helper.form_class = 'bootstrap4'
+        self.helper.form_class = 'form-horizontal'
         self.helper.form_method = 'POST'
         self.helper.form_action = '/event/create-event'
+        self.helper.label_class = 'col-lg-2'
+        self.helper.field_class = 'col-lg-8 mb-2 mt-2'
         self.helper.attrs = {'novalidate': ''}
 
         self.helper.add_input(Submit('submit', 'Create Event'))
@@ -82,10 +87,12 @@ class EditEventForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'EditEventForm'
-        self.helper.form_class = 'bootstrap4'
+        self.helper.form_class = 'form-horizontal'
         self.helper.form_method = 'POST'
         # searches for the named url path ('edit_event') and supplies the event instance id to the url so the event can be edited
         self.helper.form_action = reverse('event_planner:edit_event', args=[self.instance.id])
+        self.helper.label_class = 'col-lg-2'
+        self.helper.field_class = 'col-lg-8 mb-2 mt-2'
         self.helper.attrs = {'novalidate': ''}
 
         self.helper.add_input(Submit('submit', 'Edit Event'))
@@ -106,6 +113,7 @@ class CommentForm(forms.ModelForm):
         self.helper.form_class = 'bootstrap4'
         self.helper.form_method = 'POST'
         self.helper.form_show_errors = True
+        self.helper.field_class = 'mb-2 mt-2'
 
         self.helper.add_input(Submit('submit', 'Add Comment'))
 
